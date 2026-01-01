@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  <title>75 Hard Tracker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: #000000;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #000000;
+    }
+    .header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #1a1a1a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-icon {
+      font-size: 28px;
+    }
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      font-size: 14px;
+      color: #888;
+    }
+    .fail-badge {
+      color: #ef4444;
+      font-weight: 600;
+    }
+    .nav {
+      display: flex;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .nav-button {
+      flex: 1;
+      padding: 12px;
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-button.active {
+      color: #fff;
+      border-bottom: 2px solid #fff;
+    }
+    .main {
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+    .start-prompt {
+      text-align: center;
+      padding-top: 60px;
+    }
+    .start-title {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+    .start-text {
+      color: #666;
+      margin-bottom: 32px;
+    }
+    .start-button {
+      background: #fff;
+      color: #000;
+      border: none;
+      padding: 16px 48px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .start-button:active {
+      transform: scale(0.98);
+      background: #e5e5e5;
+    }
+    .date-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .date-nav-button {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      color: #fff;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .date-nav-button:active {
+      background: #252525;
+    }
+    .date-display {
+      text-align: center;
+    }
+    .date-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .day-badge {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .invalid-day {
+      text-align: center;
+      color: #666;
+      padding: 40px 0;
+    }
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      width: 100%;
+    }
+    .task-item:active {
+      transform: scale(0.98);
+    }
+    .task-item.complete {
+      background: #0d2818;
+      border-color: #1a5d2e;
+    }
+    .task-check {
+      font-size: 20px;
+      width: 24px;
+    }
+    .task-label {
+      flex: 1;
+    }
+    .day-complete-banner {
+      margin-top: 16px;
+      padding: 16px;
+      background: #1a5d2e;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .photo-section, .notes-section {
+      margin-top: 24px;
+    }
+    .section-label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .photo-placeholder {
+      padding: 40px;
+      text-align: center;
+      color: #666;
+      background: #1a1a1a;
+      border-radius: 12px;
+      border: 1px solid #2a2a2a;
+    }
+    .photo-container {
+      position: relative;
+    }
+    .photo-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #1a1a1a;
+    }
+    .photo-delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.7);
+      border: none;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .photo-upload-btn {
+      display: block;
+      padding: 40px;
+      text-align: center;
+      color: #666;
+      background: #1a1a1a;
+      border-radius: 12px;
+      border: 1px dashed #3a3a3a;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .photo-upload-btn:active {
+      background: #252525;
+    }
+    .photo-upload-btn input {
+      display: none;
+    }
+    .notes-input {
+      width: 100%;
+      padding: 12px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .notes-input:focus {
+      outline: none;
+      border-color: #3a3a3a;
+    }
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .calendar-header-cell {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      padding: 8px 0;
+    }
+    .calendar-week {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+    .calendar-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      border-radius: 10px;
+      background: #1a1a1a;
+      border: none;
+      color: #666;
+    }
+    .calendar-cell.clickable {
+      cursor: pointer;
+      color: #fff;
+    }
+    .calendar-cell.clickable:active {
+      transform: scale(0.95);
+    }
+    .calendar-cell.complete {
+      background: #1a5d2e;
+      color: #fff;
+    }
+    .calendar-cell.failed {
+      background: #6b1c1c;
+      color: #fff;
+    }
+    .calendar-cell.today {
+      box-shadow: inset 0 0 0 2px #3b82f6;
+    }
+    .calendar-cell.selected {
+      box-shadow: inset 0 0 0 2px #fff;
+    }
+    .calendar-legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #666;
+    }
+    .legend-complete { color: #166534; }
+    .legend-failed { color: #ef4444; }
+    .legend-today { color: #3b82f6; }
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .settings-actions {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .settings-button {
+      padding: 16px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .settings-button:active {
+      transform: scale(0.98);
+    }
+    .settings-button input {
+      display: none;
+    }
+    .danger-button {
+      background: #6b1c1c;
+      border-color: #8b2525;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+    .modal-content {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 320px;
+      border: 1px solid #2a2a2a;
+    }
+    .modal-title {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+    }
+    .modal-date-input {
+      width: 100%;
+      padding: 12px;
+      background: #252525;
+      border: 1px solid #3a3a3a;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .modal-cancel {
+      flex: 1;
+      padding: 12px;
+      background: #2a2a2a;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+    }
+    .modal-confirm {
+      flex: 1;
+      padding: 12px;
+      background: #fff;
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">♠</span>
+        <span class="logo-text">75 HARD</span>
+      </div>
+      <div class="stats-bar" id="statsBar"></div>
+    </header>
+
+```
+<nav class="nav">
+  <button class="nav-button active" data-view="tracker">Tracker</button>
+  <button class="nav-button" data-view="calendar">Calendar</button>
+  <button class="nav-button" data-view="settings">Settings</button>
+</nav>
+
+<main class="main" id="mainContent"></main>
+```
+
+  </div>
+
+  <div class="modal hidden" id="startModal">
+    <div class="modal-content">
+      <h3 class="modal-title">Select Start Date</h3>
+      <input type="date" class="modal-date-input" id="startDateInput">
+      <div class="modal-actions">
+        <button class="modal-cancel" id="cancelStart">Cancel</button>
+        <button class="modal-confirm" id="confirmStart">Begin</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = '75hard_data';
+    const PHOTO_KEY_PREFIX = '75hard_photo_';
+    
+    const TASKS = [
+      { id: 'workout1', label: '45 Min Workout' },
+      { id: 'workout2', label: '45 Min Outdoor Workout' },
+      { id: 'photo', label: 'Progress Photo' },
+      { id: 'reading', label: '10 Pages Reading' },
+      { id: 'water', label: '1 Gallon Water (3.8L)' },
+      { id: 'diet', label: 'Follow Diet' },
+      { id: 'noCheat', label: 'No Cheat Meals/Alcohol' },
+    ];
+
+    let data = { startDate: null, days: {}, notes: {} };
+    let selectedDate = formatDate(new Date());
+    let currentView = 'tracker';
+
+    // Utility functions
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    function parseDate(str) {
+      return new Date(str + 'T00:00:00');
+    }
+
+    function getDayNumber(startDate, currentDate) {
+      const start = parseDate(startDate);
+      const current = parseDate(currentDate);
+      const diffTime = current.getTime() - start.getTime();
+      return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    function isDateInRange(date, startDate) {
+      const dayNum = getDayNumber(startDate, date);
+      return dayNum >= 1 && dayNum <= 75;
+    }
+
+    function isDayComplete(dayData) {
+      if (!dayData) return false;
+      return TASKS.every(task => dayData[task.id] === true);
+    }
+
+    // Storage functions
+    function loadData() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          data = { startDate: null, days: {}, notes: {}, ...JSON.parse(stored) };
+        }
+      } catch (e) {
+        console.error('Failed to load data:', e);
+      }
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.error('Failed to save data:', e);
+      }
+    }
+
+    function loadPhoto(date) {
+      try {
+        return localStorage.getItem(PHOTO_KEY_PREFIX + date);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function savePhoto(date, base64Data) {
+      try {
+        localStorage.setItem(PHOTO_KEY_PREFIX + date, base64Data);
+        return true;
+      } catch (e) {
+        console.error('Failed to save photo:', e);
+        return false;
+      }
+    }
+
+    function deletePhoto(date) {
+      try {
+        localStorage.removeItem(PHOTO_KEY_PREFIX + date);
+      } catch (e) {
+        console.error('Failed to delete photo:', e);
+      }
+    }
+
+    function getAllPhotoKeys() {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(PHOTO_KEY_PREFIX)) {
+          keys.push(key);
+        }
+      }
+      return keys;
+    }
+
+    // Stats calculation
+    function getStats() {
+      if (!data.startDate) return { currentDay: 0, completedDays: 0, streak: 0, failed: false };
+      
+      const today = formatDate(new Date());
+      const currentDay = Math.max(0, getDayNumber(data.startDate, today));
+      
+      let completedDays = 0;
+      let streak = 0;
+      let failed = false;
+      
+      for (let i = 1; i <= Math.min(currentDay, 75); i++) {
+        const date = new Date(parseDate(data.startDate));
+        date.setDate(date.getDate() + i - 1);
+        const dateStr = formatDate(date);
+        
+        if (isDayComplete(data.days[dateStr])) {
+          completedDays++;
+          streak++;
+        } else if (dateStr < today) {
+          failed = true;
+          streak = 0;
+        }
+      }
+      
+      return { currentDay: Math.min(currentDay, 75), completedDays, streak, failed };
+    }
+
+    // Render functions
+    function renderStats() {
+      const statsBar = document.getElementById('statsBar');
+      if (!data.startDate) {
+        statsBar.innerHTML = '';
+        return;
+      }
+      
+      const stats = getStats();
+      statsBar.innerHTML = `
+        <span>Day ${stats.currentDay}/75</span>
+        <span>✓ ${stats.completedDays}</span>
+        <span>🔥 ${stats.streak}</span>
+        ${stats.failed ? '<span class="fail-badge">RESTART NEEDED</span>' : ''}
+      `;
+    }
+
+    function renderTracker() {
+      const main = document.getElementById('mainContent');
+      
+      if (!data.startDate) {
+        main.innerHTML = `
+          <div class="start-prompt">
+            <h2 class="start-title">Ready to Begin?</h2>
+            <p class="start-text">75 days. No compromises. No substitutions.</p>
+            <button class="start-button" id="openStartModal">Start Challenge</button>
+          </div>
+        `;
+        document.getElementById('openStartModal').addEventListener('click', () => {
+          document.getElementById('startDateInput').value = formatDate(new Date());
+          document.getElementById('startModal').classList.remove('hidden');
+        });
+        return;
+      }
+
+      const dayNumber = getDayNumber(data.startDate, selectedDate);
+      const isValidDay = isDateInRange(selectedDate, data.startDate);
+      const dayData = data.days[selectedDate] || {};
+      const dayComplete = isDayComplete(dayData);
+      const photo = loadPhoto(selectedDate);
+
+      let tasksHtml = '';
+      if (!isValidDay) {
+        tasksHtml = `<div class="invalid-day">${dayNumber < 1 ? 'Before challenge start' : 'After challenge end (Day 75)'}</div>`;
+      } else {
+        tasksHtml = `
+          <div class="task-list">
+            ${TASKS.map(task => `
+              <button class="task-item ${dayData[task.id] ? 'complete' : ''}" data-task="${task.id}">
+                <span class="task-check">${dayData[task.id] ? '✓' : '○'}</span>
+                <span class="task-label">${task.label}</span>
+              </button>
+            `).join('')}
+          </div>
+          ${dayComplete ? '<div class="day-complete-banner">✓ Day ' + dayNumber + ' Complete!</div>' : ''}
+          
+          <div class="photo-section">
+            <label class="section-label">Progress Photo</label>
+            ${photo ? `
+              <div class="photo-container">
+                <img src="${photo}" alt="Progress" class="photo-image">
+                <button class="photo-delete-btn" id="deletePhoto">✕ Remove</button>
+              </div>
+            ` : `
+              <label class="photo-upload-btn">
+                + Add Photo
+                <input type="file" accept="image/*" id="photoInput">
+              </label>
+            `}
+          </div>
+          
+          <div class="notes-section">
+            <label class="section-label">Notes</label>
+            <textarea class="notes-input" id="notesInput" rows="3" placeholder="Challenges, insights, breakthroughs...">${data.notes[selectedDate] || ''}</textarea>
+
+```
+      </div>
+    `;
+  }
+
+  main.innerHTML = `
+    <div class="date-nav">
+      <button class="date-nav-button" id="prevDay">←</button>
+      <div class="date-display">
+        <input type="date" class="date-input" id="dateInput" value="${selectedDate}">
+        ${isValidDay ? `<span class="day-badge">Day ${dayNumber}</span>` : ''}
+      </div>
+      <button class="date-nav-button" id="nextDay">→</button>
+    </div>
+    ${tasksHtml}
+  `;
+
+  // Event listeners
+  document.getElementById('prevDay').addEventListener('click', () => {
+    const prev = new Date(parseDate(selectedDate));
+    prev.setDate(prev.getDate() - 1);
+    selectedDate = formatDate(prev);
+    render();
+  });
+
+  document.getElementById('nextDay').addEventListener('click', () => {
+    const next = new Date(parseDate(selectedDate));
+    next.setDate(next.getDate() + 1);
+    selectedDate = formatDate(next);
+    render();
+  });
+
+  document.getElementById('dateInput').addEventListener('change', (e) => {
+    selectedDate = e.target.value;
+    render();
+  });
+
+  if (isValidDay) {
+    document.querySelectorAll('.task-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const taskId = btn.dataset.task;
+        const dayData = data.days[selectedDate] || {};
+        dayData[taskId] = !dayData[taskId];
+        data.days[selectedDate] = dayData;
+        saveData();
+        render();
+      });
+    });
+
+    const notesInput = document.getElementById('notesInput');
+    if (notesInput) {
+      notesInput.addEventListener('input', (e) => {
+        data.notes[selectedDate] = e.target.value;
+        saveData();
+      });
+    }
+
+    const photoInput = document.getElementById('photoInput');
+    if (photoInput) {
+      photoInput.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const success = savePhoto(selectedDate, ev.target.result);
+          if (success) {
+            render();
+          } else {
+            alert('Failed to save photo. It may be too large.');
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    const deleteBtn = document.getElementById('deletePhoto');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => {
+        if (confirm('Delete this photo?')) {
+          deletePhoto(selectedDate);
+          render();
+        }
+      });
+    }
+  }
+}
+
+function renderCalendar() {
+  const main = document.getElementById('mainContent');
+  
+  if (!data.startDate) {
+    main.innerHTML = '<div class="invalid-day">Start a challenge first</div>';
+    return;
+  }
+
+  const today = formatDate(new Date());
+  const weeks = [];
+  let currentWeek = [];
+  const startDayOfWeek = parseDate(data.startDate).getDay();
+  
+  for (let i = 0; i < startDayOfWeek; i++) {
+    currentWeek.push(null);
+  }
+  
+  for (let i = 1; i <= 75; i++) {
+    const date = new Date(parseDate(data.startDate));
+    date.setDate(date.getDate() + i - 1);
+    currentWeek.push({ day: i, date: formatDate(date) });
+    
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+  }
+  
+  if (currentWeek.length > 0) {
+    while (currentWeek.length < 7) currentWeek.push(null);
+    weeks.push(currentWeek);
+  }
+
+  main.innerHTML = `
+    <div class="calendar-header">
+      ${['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => `<div class="calendar-header-cell">${d}</div>`).join('')}
+    </div>
+    ${weeks.map(week => `
+      <div class="calendar-week">
+        ${week.map(cell => {
+          if (!cell) return '<div class="calendar-cell"></div>';
+          const complete = isDayComplete(data.days[cell.date]);
+          const isToday = cell.date === today;
+          const isPast = cell.date < today;
+          const isFailed = isPast && !complete;
+          const isSelected = cell.date === selectedDate;
+          
+          let classes = 'calendar-cell clickable';
+          if (complete) classes += ' complete';
+          if (isFailed) classes += ' failed';
+          if (isToday) classes += ' today';
+          if (isSelected) classes += ' selected';
+          
+          return `<button class="${classes}" data-date="${cell.date}">${cell.day}</button>`;
+        }).join('')}
+      </div>
+    `).join('')}
+    <div class="calendar-legend">
+      <span><span class="legend-complete">●</span> Complete</span>
+      <span><span class="legend-failed">●</span> Failed</span>
+      <span><span class="legend-today">◯</span> Today</span>
+    </div>
+  `;
+
+  document.querySelectorAll('.calendar-cell.clickable').forEach(cell => {
+    cell.addEventListener('click', () => {
+      selectedDate = cell.dataset.date;
+      currentView = 'tracker';
+      render();
+    });
+  });
+}
+
+function renderSettings() {
+  const main = document.getElementById('mainContent');
+  const stats = getStats();
+
+  main.innerHTML = `
+    <div class="setting-item">
+      <span>Challenge Start Date</span>
+      <span>${data.startDate || 'Not started'}</span>
+    </div>
+    <div class="setting-item">
+      <span>Days Completed</span>
+      <span>${stats.completedDays} / 75</span>
+    </div>
+    <div class="setting-item">
+      <span>Current Streak</span>
+      <span>${stats.streak} days</span>
+    </div>
+    
+    <div class="settings-actions">
+      <button class="settings-button" id="exportBtn">Export Backup</button>
+      <label class="settings-button">
+        Import Backup
+        <input type="file" accept=".json" id="importInput">
+      </label>
+      <button class="settings-button danger-button" id="resetBtn">Reset Challenge</button>
+    </div>
+  `;
+
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const exportData = {
+      ...data,
+      photos: {}
+    };
+    
+    // Include all photos in export
+    getAllPhotoKeys().forEach(key => {
+      const date = key.replace(PHOTO_KEY_PREFIX, '');
+      exportData.photos[date] = localStorage.getItem(key);
+    });
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `75hard-backup-${formatDate(new Date())}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('importInput').addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (imported.startDate !== undefined && imported.days) {
+          // Restore main data
+          data = {
+            startDate: imported.startDate,
+            days: imported.days || {},
+            notes: imported.notes || {}
+          };
+          saveData();
+          
+          // Restore photos if present
+          if (imported.photos) {
+            Object.entries(imported.photos).forEach(([date, photoData]) => {
+              if (photoData) {
+                savePhoto(date, photoData);
+              }
+            });
+          }
+          
+          alert('Data imported successfully');
+          render();
+        } else {
+          alert('Invalid backup file');
+        }
+      } catch {
+        alert('Failed to parse backup file');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (confirm('Reset all progress? This cannot be undone.')) {
+      // Clear photos
+      getAllPhotoKeys().forEach(key => localStorage.removeItem(key));
+      
+      // Clear main data
+      localStorage.removeItem(STORAGE_KEY);
+      data = { startDate: null, days: {}, notes: {} };
+      selectedDate = formatDate(new Date());
+      render();
+    }
+  });
+}
+
+function render() {
+  renderStats();
+  
+  document.querySelectorAll('.nav-button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === currentView);
+  });
+
+  if (currentView === 'tracker') {
+    renderTracker();
+  } else if (currentView === 'calendar') {
+    renderCalendar();
+  } else if (currentView === 'settings') {
+    renderSettings();
+  }
+}
+
+// Initialize
+document.querySelectorAll('.nav-button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentView = btn.dataset.view;
+    render();
+  });
+});
+
+document.getElementById('cancelStart').addEventListener('click', () => {
+  document.getElementById('startModal').classList.add('hidden');
+});
+
+document.getElementById('confirmStart').addEventListener('click', () => {
+  const startDate = document.getElementById('startDateInput').value;
+  if (startDate) {
+    data.startDate = startDate;
+    data.days = {};
+    data.notes = {};
+    saveData();
+    selectedDate = startDate;
+    document.getElementById('startModal').classList.add('hidden');
+    render();
+  }
+});
+
+loadData();
+render();
+```
+
+  </script>
+</body>
+</html>
